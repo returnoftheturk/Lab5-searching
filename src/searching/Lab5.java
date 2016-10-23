@@ -17,6 +17,7 @@ public class Lab5 {
 	// Color sensor port connected to input S2
 	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	private static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	private static final Port colorPort = LocalEV3.get().getPort("S4");
 
@@ -24,6 +25,7 @@ public class Lab5 {
 	public static final double TRACK = 14.6;
 	private static Navigation nav;
 	private static Navigator navr;
+	private static Driver drv;
 
 	public static void main(String[] args) {
 
@@ -73,7 +75,7 @@ public class Lab5 {
 
 		LightLocalizer lsl = new LightLocalizer(odo, nav, colorValue, colorData, rightMotor, leftMotor);
 		BlockDetection blockDetection = new BlockDetection(usSensor, colorSensor, colorData);
-
+		
 		int buttonChoice;
 
 		// some objects that need to be instantiated
@@ -111,6 +113,7 @@ public class Lab5 {
 			t.clear();
 			UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData, usl);
 			LCDInfo lcd = new LCDInfo(odo, usl, lsl, LCDInfo.DemoType.OBJECT_SEARCH_FIND, blockDetection);
+			drv = new Driver(odo, usPoller, blockDetection, armMotor);
 			navr = new Navigator(odo,usPoller);
 			usPoller.start();
 			usl.doLocalization();
@@ -136,8 +139,8 @@ public class Lab5 {
 		int[][] waypoints = { { 60, 30 }, { 30, 30 }, { 30, 60 }, { 60, 0 } };
 
 		for (int[] point : waypoints) {
-			navr.travelTo(point[0], point[1], true);
-			while (navr.isTravelling()) {
+			drv.travelTo(point[0], point[1], true);
+			while (drv.isTravelling()) {
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {

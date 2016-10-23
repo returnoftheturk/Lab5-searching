@@ -2,10 +2,10 @@ package searching;
 
 public class ObstacleAvoidance extends Thread{
 
-	Navigator nav;
+	Driver nav;
 	boolean safe;
 	
-	public ObstacleAvoidance(Navigator nav){
+	public ObstacleAvoidance(Driver nav){
 		this.nav = nav;
 		safe = false;
 	}

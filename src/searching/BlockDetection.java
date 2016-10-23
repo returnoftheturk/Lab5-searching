@@ -8,7 +8,6 @@ public class BlockDetection implements UltrasonicController {
 	private int distance;
 	private String[] blockInfo;
 	private float[] colorData;
-	
 
 	public BlockDetection(SampleProvider usSensor, SampleProvider colorSensor, float[] colorData) {
 		this.usSensor = usSensor;
@@ -17,25 +16,24 @@ public class BlockDetection implements UltrasonicController {
 		this.colorData = colorData;
 	}
 
-	public void doDetection(){
+	public void doDetection() {
 		int count = 0;
-		while (true){
-			if (distance>5){
+		while (true) {
+			if (distance > 5) {
 				resetBlockInfo();
 			}
-			
-			if (distance<5){
+
+			if (distance < 5) {
 				blockInfo[0] = "Object Detected";
-				if (getColorData()<7 && getColorData()>5){
+				if (getColorData() < 7 && getColorData() > 5) {
 					blockInfo[1] = "Block";
-				}
-				else if (getColorData()>10 && getColorData()<15){
+				} else if (getColorData() > 10 && getColorData() < 15) {
 					blockInfo[1] = "Not Block";
 				}
 			}
-			
+
 		}
-		
+
 	}
 
 	@Override
@@ -66,5 +64,19 @@ public class BlockDetection implements UltrasonicController {
 		colorSensor.fetchSample(colorData, 0);
 		double colorLevel = colorData[0];
 		return colorLevel;
+	}
+
+	public boolean detectObject() {
+		if (blockInfo[0] == "Object Detected")
+			return true;
+		else
+			return false;
+	}
+	public boolean detectBlock() {
+		if (blockInfo[1] == "Block")
+			return true;
+		else
+			return false;
+
 	}
 }
