@@ -16,6 +16,7 @@ public class UltrasonicPoller extends Thread{
 	private SampleProvider us;
 	private UltrasonicController cont;
 	private float[] usData;
+	int distance;
 	
 	public UltrasonicPoller(SampleProvider us, float[] usData, UltrasonicController cont){
 		this.us = us;
@@ -27,7 +28,6 @@ public class UltrasonicPoller extends Thread{
 //  Need to convert US result to an integer [0,255]
 	
 	public void run(){
-		int distance;
 		while (true){
 			us.fetchSample(usData, 0); // acquire data
 			distance = (int)(usData[0]*100.0); // extract from buffer, cast to int
@@ -40,6 +40,11 @@ public class UltrasonicPoller extends Thread{
 			
 		}
 		
+	}
+
+	public int getDistance() {
+		// TODO Auto-generated method stub
+		return distance;
 	}
 }
 

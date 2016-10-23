@@ -15,7 +15,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 public class Navigation {
 	final static int FAST = 200, SLOW = 100, ACCELERATION = 200;
 	final static double DEG_ERR = 3.0, CM_ERR = 3.0;
-	private Odometer odometer;
+	public Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	private boolean isNavigating;
 	private double theta;
@@ -178,7 +178,7 @@ public class Navigation {
 		return distance;
 	}
 
-	private double calculateAngle(double x, double y) { // calculate angles
+	protected double calculateAngle(double x, double y) { // calculate angles
 														// according to tutorial
 														// slides
 		double thetad = 0;
@@ -225,5 +225,12 @@ public class Navigation {
 
 		return diffTheta;
 
+	}
+	protected boolean facingDest(double angle) {
+		return Math.abs(angle - odometer.getTheta()) < DEG_ERR;
+	}
+	protected boolean checkIfDone(double x, double y) {
+		return Math.abs(x - odometer.getX()) < CM_ERR
+				&& Math.abs(y - odometer.getY()) < CM_ERR;
 	}
 }
