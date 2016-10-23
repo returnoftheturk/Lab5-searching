@@ -47,14 +47,14 @@ public class ObstacleAvoidance extends Thread {
 			Sound.buzz();
 			armMotor.setSpeed(200);
 			armMotor.rotate(100, false);
-			nav.travelTo(75, 75);
-			// blockInfo[1] = "Block";
-		} else if (getColorData() > 10 && getColorData() < 15) {
-			Sound.beep();
-			nav.turnBy(90);
-			nav.goForward(30);
-			nav.turnBy(-90);
+			nav.travelTo(75, 75, false);
 			
+		} else  {
+			Sound.beep();
+			nav.travelTo(nav.odometer.getX()-5, nav.odometer.getY()-5, false);
+			nav.turnTo(nav.odometer.getTheta() + 90, false);
+			nav.travelTo(nav.odometer.getX() + 15, nav.odometer.getY()+15, false);
+			nav.turnTo(nav.odometer.getTheta() - 90, false);
 
 		}
 
