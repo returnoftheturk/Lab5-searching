@@ -19,22 +19,21 @@ public class BlockDetection implements UltrasonicController {
 
 	public void doDetection(){
 		int count = 0;
-		while (count<10){
-			while (distance>5){
-				resetBlockInfo();	
+		while (true){
+			if (distance>5){
+				resetBlockInfo();
 			}
 			
-			while (distance<5){
+			if (distance<5){
 				blockInfo[0] = "Object Detected";
-				if (getColorData()<7&&getColorData()>5){
+				if (getColorData()<7 && getColorData()>5){
 					blockInfo[1] = "Block";
 				}
 				else if (getColorData()>10 && getColorData()<15){
 					blockInfo[1] = "Not Block";
 				}
 			}
-			Button.waitForAnyPress();
-			count++;
+			
 		}
 		
 	}
