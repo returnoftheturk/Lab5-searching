@@ -103,9 +103,9 @@ public class Lab5 {
 			
 			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_SEARCH_FIND, usl);
 			usPoller.start();
-			nav.start();
 //			nav.turnBy(360);
-//			usl.doLocalization();
+			usl.doLocalization();
+			nav.start();
 			completeCourse();
 		}
 
@@ -119,10 +119,8 @@ public class Lab5 {
 		int[][] waypoints = { { 60, 30 }, { 30, 30 }, { 30, 60 }, { 60, 0 } };
 
 		for (int[] point : waypoints) {
-			Sound.buzz();
 			nav.travelTo(point[0], point[1], true);
 			while (nav.isTravelling()) {
-				Sound.beep();
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {

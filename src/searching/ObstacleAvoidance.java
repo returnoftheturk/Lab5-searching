@@ -31,7 +31,10 @@ public class ObstacleAvoidance extends Thread{
 		 */
 		
 //		Log.log(Log.Sender.avoidance,"avoiding obstacle!");
-		nav.setSpeeds(0, 0);
+		nav.setSpeeds(30, 30);
+		if (nav.usSensor.getDistance()<8){
+			nav.stopMotors();
+		}
 		nav.turnTo(0,true);
 		nav.goForward(5, false); //using false means the Navigation method is used
 //		Log.log(Log.Sender.avoidance,"obstacle avoided!");

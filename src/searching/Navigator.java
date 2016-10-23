@@ -1,5 +1,6 @@
 package searching;
 
+import lejos.hardware.Sound;
 
 /*
  * 
@@ -68,7 +69,7 @@ public class Navigator extends Navigation {
 	private void updateTravel() {
 		double minAng;
 
-		minAng = calculateAngle(destx, desty);
+		minAng = getDestAngle(destx, desty);
 		/*
 		 * Use the BasicNavigator turnTo here because 
 		 * minAng is going to be very small so just complete
@@ -84,6 +85,7 @@ public class Navigator extends Navigation {
 		while (true) {
 			switch (state) {
 			case INIT:
+//				Sound.buzz();
 				if (isNavigating) {
 					state = State.TURNING;
 				}
@@ -101,14 +103,16 @@ public class Navigator extends Navigation {
 				 * scanning with a sensor for something...)
 				 * 
 				 */
-				double destAngle = calculateAngle(destx, desty);
-				turnto1(destAngle);
+//				Sound.beep();
+				double destAngle = getDestAngle(destx, desty);
+				turnTo(destAngle);
 				if(facingDest(destAngle)){
-					setSpeeds(0,0);
+					stopMotors();
 					state = State.TRAVELLING;
 				}
 				break;
 			case TRAVELLING:
+//				Sound.buzz();
 				if (checkEmergency()) { // order matters!
 					state = State.EMERGENCY;
 					avoidance = new ObstacleAvoidance(this);
@@ -116,7 +120,7 @@ public class Navigator extends Navigation {
 				} else if (!checkIfDone(destx, desty)) {
 					updateTravel();
 				} else { // Arrived!
-					setSpeeds(0, 0);
+					stopMotors();
 					isNavigating = false;
 					state = State.INIT;
 				}
@@ -146,13 +150,13 @@ public class Navigator extends Navigation {
 		error = angle - this.odometer.getTheta();
 
 		if (error < -180.0) {
-			this.setSpeeds(-SLOW, SLOW);
+			this.setSpeeds(SLOW, -SLOW);
 		} else if (error < 0.0) {
-			this.setSpeeds(SLOW, -SLOW);
-		} else if (error > 180.0) {
-			this.setSpeeds(SLOW, -SLOW);
-		} else {
 			this.setSpeeds(-SLOW, SLOW);
+		} else if (error > 180.0) {
+			this.setSpeeds(-SLOW, SLOW);
+		} else {
+			this.setSpeeds(SLOW, -SLOW);
 		}
 
 	}
@@ -162,9 +166,9 @@ public class Navigator extends Navigation {
 	 */
 	public void goForward(double distance, boolean avoid) {
 		double x = odometer.getX()
-				+ Math.cos(Math.toRadians(this.odometer.getTheta())) * distance;
-		double y = odometer.getY()
 				+ Math.sin(Math.toRadians(this.odometer.getTheta())) * distance;
+		double y = odometer.getY()
+				+ Math.cos(Math.toRadians(this.odometer.getTheta())) * distance;
 
 		this.travelTo(x, y, avoid);
 

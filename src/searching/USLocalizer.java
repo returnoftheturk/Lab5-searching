@@ -111,16 +111,16 @@ public class USLocalizer implements UltrasonicController {
 			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
 			Sound.beep();
 			
-			nav.turnto1(-90);
-			nav.stopMotors();
+			nav.turnTo(270, true);
+			
 			double loc1 = readUSDistance();
 			Sound.beep();
-			nav.turnto1(-180);
+			nav.turnTo(180, true);
 			double loc2 = readUSDistance();
 			Sound.beep();
 			nav.travelTo(30.48-(loc1+8), 30.48- (loc2+8));
 			Sound.beep();
-			nav.turnto1(0);
+			nav.turnTo(0, true);
 			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
 			
 		} 
