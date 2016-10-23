@@ -14,37 +14,38 @@ public class LCDInfo implements TimerListener{
 	public static final int LCD_REFRESH = 100;
 	private Odometer odo;
 	private USLocalizer usl;
+	private BlockDetection blk;
 	private Timer lcdTimer;
 	private TextLCD LCD = LocalEV3.get().getTextLCD();
-	private LightLocalizer lsl;
+//	private LightLocalizer lsl;
 	
 	// arrays for displaying data
 	private double [] pos;
 	private String[] info;
-	private BlockDetection blockDetection;
+	private UltrasonicController usc; 
 	
-	public LCDInfo(Odometer odo, USLocalizer usl, LightLocalizer lsl,
-			DemoType demoType, BlockDetection blockDetection) {
+	public LCDInfo(Odometer odo, DemoType demoType, UltrasonicController usc) {
 		this.odo = odo;
-		this.usl = usl;
-		this.lsl = lsl;
+		if (demoType == DemoType.OBJECT_DETECTION)
+			this.blk = (BlockDetection)usc;
+		if (demoType == DemoType.OBJECT_SEARCH_FIND)
+			this.usl = (USLocalizer)usc;
 		this.demoType = demoType;
 		this.lcdTimer = new Timer(LCD_REFRESH, this);
-		this.blockDetection = blockDetection;
 		
 		// initialise the arrays for displaying data
-		pos = new double [3];
 		info = new String[2];
+		pos = new double[3];
 		
 		// start the timer
 		lcdTimer.start();
 	}
-	
+		
 	public void timedOut() {
 		
 		if (demoType == DemoType.OBJECT_DETECTION){
 			LCD.clear();
-			blockDetection.getBlockInfo(info);
+			blk.getBlockInfo(info);
 			LCD.drawString(info[0], 0, 0);
 			LCD.drawString(info[1], 0, 1);
 			
@@ -58,9 +59,9 @@ public class LCDInfo implements TimerListener{
 			LCD.drawString("C: ", 0, 4);
 			LCD.drawInt((int)(pos[0] * 10), 3, 0);
 			LCD.drawInt((int)(pos[1] * 10), 3, 1);
-			LCD.drawString(formattedDoubleToString((pos[2] * 180/Math.PI),4), 3, 2);
+			LCD.drawString(formattedDoubleToString((pos[2]),4), 3, 2);
 			LCD.drawInt((int)usl.readUSDistance(), 4, 3);
-			LCD.drawString(formattedDoubleToString(lsl.getColorData(), 2), 3, 4);	
+//			LCD.drawString(formattedDoubleToString(lsl.getColorData(), 2), 3, 4);	
 		}
 	}
 	private static String formattedDoubleToString(double x, int places) {

@@ -102,7 +102,7 @@ public class Navigator extends Navigation {
 				 * 
 				 */
 				double destAngle = calculateAngle(destx, desty);
-				turnTo(destAngle);
+				turnto1(destAngle);
 				if(facingDest(destAngle)){
 					setSpeeds(0,0);
 					state = State.TRAVELLING;

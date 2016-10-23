@@ -12,7 +12,7 @@ package searching;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-public class Navigation {
+public class Navigation extends Thread {
 	final static int FAST = 200, SLOW = 100, ACCELERATION = 200;
 	final static double DEG_ERR = 3.0, CM_ERR = 3.0;
 	public Odometer odometer;
