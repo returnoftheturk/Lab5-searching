@@ -6,6 +6,11 @@ import lejos.utility.Timer;
 import lejos.utility.TimerListener;
 
 public class LCDInfo implements TimerListener{
+	public enum DemoType {
+		OBJECT_DETECTION, OBJECT_SEARCH_FIND
+	};
+	
+	private DemoType demoType;
 	public static final int LCD_REFRESH = 100;
 	private Odometer odo;
 	private USLocalizer usl;
@@ -15,33 +20,48 @@ public class LCDInfo implements TimerListener{
 	
 	// arrays for displaying data
 	private double [] pos;
+	private String[] info;
+	private BlockDetection blockDetection;
 	
-	public LCDInfo(Odometer odo, USLocalizer usl, LightLocalizer lsl) {
+	public LCDInfo(Odometer odo, USLocalizer usl, LightLocalizer lsl,
+			DemoType demoType, BlockDetection blockDetection) {
 		this.odo = odo;
 		this.usl = usl;
 		this.lsl = lsl;
+		this.demoType = demoType;
 		this.lcdTimer = new Timer(LCD_REFRESH, this);
+		this.blockDetection = blockDetection;
 		
 		// initialise the arrays for displaying data
 		pos = new double [3];
+		info = new String[2];
 		
 		// start the timer
 		lcdTimer.start();
 	}
 	
-	public void timedOut() { 
-		odo.getPosition(pos);
-		LCD.clear();
-		LCD.drawString("X: ", 0, 0);
-		LCD.drawString("Y: ", 0, 1);
-		LCD.drawString("H: ", 0, 2);
-		LCD.drawString("US:          ", 0, 3);
-		LCD.drawString("C: ", 0, 4);
-		LCD.drawInt((int)(pos[0] * 10), 3, 0);
-		LCD.drawInt((int)(pos[1] * 10), 3, 1);
-		LCD.drawString(formattedDoubleToString((pos[2] * 180/Math.PI),4), 3, 2);
-		LCD.drawInt((int)usl.readUSDistance(), 4, 3);
-		LCD.drawString(formattedDoubleToString(lsl.getColorData(), 2), 3, 4);
+	public void timedOut() {
+		
+		if (demoType == DemoType.OBJECT_DETECTION){
+			LCD.clear();
+			blockDetection.getBlockInfo(info);
+			LCD.drawString(info[0], 0, 0);
+			LCD.drawString(info[1], 0, 1);
+			
+		} else if (demoType == DemoType.OBJECT_SEARCH_FIND){
+			odo.getPosition(pos);
+			LCD.clear();
+			LCD.drawString("X: ", 0, 0);
+			LCD.drawString("Y: ", 0, 1);
+			LCD.drawString("H: ", 0, 2);
+			LCD.drawString("US:          ", 0, 3);
+			LCD.drawString("C: ", 0, 4);
+			LCD.drawInt((int)(pos[0] * 10), 3, 0);
+			LCD.drawInt((int)(pos[1] * 10), 3, 1);
+			LCD.drawString(formattedDoubleToString((pos[2] * 180/Math.PI),4), 3, 2);
+			LCD.drawInt((int)usl.readUSDistance(), 4, 3);
+			LCD.drawString(formattedDoubleToString(lsl.getColorData(), 2), 3, 4);	
+		}
 	}
 	private static String formattedDoubleToString(double x, int places) {
 		String result = "";

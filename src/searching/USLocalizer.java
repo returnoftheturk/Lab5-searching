@@ -17,8 +17,8 @@ public class USLocalizer implements UltrasonicController {
 	private SampleProvider usSensor;
 	private float[] usData;
 	private LocalizationType locType;
-	private final int d = 40;
-	private final int k = 10;
+	private final int d = 30;
+	private final int k = 7;
 	private int wallDistance;
 
 	public USLocalizer(Odometer odo, Navigation nav, SampleProvider usSensor, float[] usData, LocalizationType locType,
@@ -100,6 +100,8 @@ public class USLocalizer implements UltrasonicController {
 			}
 
 			nav.turnBy((angleB - angleA) / 2 - 45 + (angleA1 - angleA2) / 2);
+			nav.stopMotors();
+			Sound.buzz();
 
 			// angleA is clockwise from angleB, so assume the average of the
 			// angles to the right of angleB is 45 degrees past 'north'
@@ -116,7 +118,7 @@ public class USLocalizer implements UltrasonicController {
 			nav.turnto1(-180);
 			double loc2 = readUSDistance();
 			Sound.beep();
-			nav.travelTo(30.48-(loc1-2), 30.48- (loc2-2));
+			nav.travelTo(30.48-(loc1+8), 30.48- (loc2+8));
 			Sound.beep();
 			nav.turnto1(0);
 			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
