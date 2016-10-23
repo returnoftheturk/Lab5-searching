@@ -1,46 +1,75 @@
 package searching;
 
-public class ObstacleAvoidance extends Thread{
+import lejos.hardware.Sound;
+import lejos.hardware.ev3.LocalEV3;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.SampleProvider;
+
+public class ObstacleAvoidance extends Thread {
 
 	Navigator nav;
 	boolean safe;
-	
-	public ObstacleAvoidance(Navigator nav){
+	private SampleProvider colorSensor;
+	private float[] colorData;
+	private static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+
+	public ObstacleAvoidance(Navigator nav, SampleProvider colorSensor, float[] colorData) {
 		this.nav = nav;
+		this.colorSensor = colorSensor;
+		this.colorData = colorData;
 		safe = false;
 	}
-	
-	
-	public void run(){
-		
+
+	public void run() {
+
 		/*
-		 * The "avoidance" just stops and turns to heading 0
-		 * to make sure that the threads are working properly.
+		 * The "avoidance" just stops and turns to heading 0 to make sure that
+		 * the threads are working properly.
 		 * 
-		 * If you want to call travelTo from this class you
-		 * MUST call travelTo(x,y,false) to go around the
-		 * state machine
+		 * If you want to call travelTo from this class you MUST call
+		 * travelTo(x,y,false) to go around the state machine
 		 * 
-		 * This means that you can't detect a new obstacle
-		 * while avoiding the first one. That's probably not something
-		 * you were going to do anyway.
+		 * This means that you can't detect a new obstacle while avoiding the
+		 * first one. That's probably not something you were going to do anyway.
 		 * 
-		 * Otherwise things get complicated and a lot of 
-		 * new states will be necessary.
+		 * Otherwise things get complicated and a lot of new states will be
+		 * necessary.
 		 * 
 		 */
-		
-//		Log.log(Log.Sender.avoidance,"avoiding obstacle!");
+
+		// Log.log(Log.Sender.avoidance,"avoiding obstacle!");
 		nav.setSpeeds(30, 30);
-		if (nav.usSensor.getDistance()<8){
-			nav.stopMotors();
+		while (nav.usSensor.getDistance() > 3) {
+
 		}
-		nav.turnTo(0,true);
-		nav.goForward(5, false); //using false means the Navigation method is used
-//		Log.log(Log.Sender.avoidance,"obstacle avoided!");
+		nav.stopMotors();
+		if (getColorData() < 7 && getColorData() > 5) {
+			Sound.buzz();
+			armMotor.setSpeed(200);
+			armMotor.rotate(100, false);
+			nav.travelTo(75, 75);
+			// blockInfo[1] = "Block";
+		} else if (getColorData() > 10 && getColorData() < 15) {
+			Sound.beep();
+			nav.turnBy(90);
+			nav.goForward(30);
+			nav.turnBy(-90);
+			
+
+		}
+
+		// nav.turnTo(0,true);
+		// nav.goForward(5, false); //using false means the Navigation method is
+		// used
+		// Log.log(Log.Sender.avoidance,"obstacle avoided!");
 		safe = true;
 	}
 
+	public double getColorData() {
+		colorSensor.fetchSample(colorData, 0);
+		double colorLevel = colorData[0];
+		return colorLevel;
+	}
 
 	public boolean resolved() {
 		return safe;

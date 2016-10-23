@@ -99,12 +99,12 @@ public class Lab5 {
 			USLocalizer usl = new USLocalizer(odo, navigation, usValue, usData,
 					USLocalizer.LocalizationType.FALLING_EDGE, rightMotor, leftMotor);
 			UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData, usl);
-			nav = new Navigator(odo, usPoller);
+			nav = new Navigator(odo, usPoller, colorSensor, colorData);
 			
 			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_SEARCH_FIND, usl);
 			usPoller.start();
 //			nav.turnBy(360);
-			usl.doLocalization();
+//			usl.doLocalization();
 			nav.start();
 			completeCourse();
 		}
@@ -116,7 +116,7 @@ public class Lab5 {
 	}
 
 	private static void completeCourse() {
-		int[][] waypoints = { { 60, 30 }, { 30, 30 }, { 30, 60 }, { 60, 0 } };
+		int[][] waypoints = { { 0, 70 }, { 30, 70 }, { 30, 0 }, { 60, 70 }, {70, 70} };
 
 		for (int[] point : waypoints) {
 			nav.travelTo(point[0], point[1], true);

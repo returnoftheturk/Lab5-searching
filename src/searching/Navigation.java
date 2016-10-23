@@ -136,22 +136,22 @@ public class Navigation extends Thread {
 		}
 	}
 
-	public void turnto1(double thetaFinal) {
-
-		leftMotor.setSpeed(150);
-		rightMotor.setSpeed(150);
-		double thetaOdometer = odometer.getTheta();
-		theta = thetaFinal - thetaOdometer;
-		if (theta >= -180 && theta <= 180) {
-			theta = theta;
-		} else if (theta < -180) {
-			theta = theta + 360;
-		} else if (theta > 180) {
-			theta = theta - 360;
-		}
-		leftMotor.rotate(convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), true);
-		rightMotor.rotate(-convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), false);
-	}
+//	public void turnto1(double thetaFinal) {
+//
+//		leftMotor.setSpeed(150);
+//		rightMotor.setSpeed(150);
+//		double thetaOdometer = odometer.getTheta();
+//		theta = thetaFinal - thetaOdometer;
+//		if (theta >= -180 && theta <= 180) {
+//			theta = theta;
+//		} else if (theta < -180) {
+//			theta = theta + 360;
+//		} else if (theta > 180) {
+//			theta = theta - 360;
+//		}
+//		leftMotor.rotate(convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), true);
+//		rightMotor.rotate(-convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), false);
+//	}
 
 	// method to turn by a set angle
 	public void turnBy(double angle) {

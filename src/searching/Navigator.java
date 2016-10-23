@@ -1,6 +1,7 @@
 package searching;
 
 import lejos.hardware.Sound;
+import lejos.hardware.sensor.SensorModes;
 
 /*
  * 
@@ -30,6 +31,8 @@ public class Navigator extends Navigation {
 	State state;
 
 	private boolean isNavigating = false;
+	private SensorModes colorSensor;
+	private float[] colorData;
 
 	private double destx, desty;
 
@@ -37,9 +40,11 @@ public class Navigator extends Navigation {
 
 	UltrasonicPoller usSensor;
 
-	public Navigator(Odometer odo, UltrasonicPoller usSensor) {
+	public Navigator(Odometer odo, UltrasonicPoller usSensor, SensorModes colorSensor, float [] colorData) {
 		super(odo);
 		this.usSensor = usSensor;
+		this.colorSensor = colorSensor;
+		this.colorData = colorData;
 	}
 
 	/*
@@ -115,7 +120,7 @@ public class Navigator extends Navigation {
 //				Sound.buzz();
 				if (checkEmergency()) { // order matters!
 					state = State.EMERGENCY;
-					avoidance = new ObstacleAvoidance(this);
+					avoidance = new ObstacleAvoidance(this, colorSensor, colorData);
 					avoidance.start();
 				} else if (!checkIfDone(destx, desty)) {
 					updateTravel();
