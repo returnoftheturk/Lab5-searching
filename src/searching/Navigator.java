@@ -1,5 +1,8 @@
 package searching;
 
+import lejos.hardware.Sound;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.sensor.SensorModes;
 
 /*
  * 
@@ -19,26 +22,34 @@ package searching;
  * 
  */
 
-
 public class Navigator extends Navigation {
 
 	enum State {
-		INIT, TURNING, TRAVELLING, EMERGENCY
+		INIT, TURNING, TRAVELLING, EMERGENCY, SEARCHING
 	};
 
 	State state;
-
+	private EV3LargeRegulatedMotor armMotor;
 	private boolean isNavigating = false;
+	private SensorModes colorSensor;
+	private float[] colorData;
 
 	private double destx, desty;
 
 	final static int SLEEP_TIME = 50;
+	final static int armLength = 10;
 
 	UltrasonicPoller usSensor;
+	BlockDetection detection;
 
-	public Navigator(Odometer odo, UltrasonicPoller usSensor) {
+	public Navigator(Odometer odo, UltrasonicPoller usSensor, SensorModes colorSensor, float[] colorData,
+			BlockDetection detection, EV3LargeRegulatedMotor armMotor) {
 		super(odo);
 		this.usSensor = usSensor;
+		this.colorSensor = colorSensor;
+		this.colorData = colorData;
+		this.detection = detection;
+		this.armMotor = armMotor;
 	}
 
 	/*
@@ -47,8 +58,8 @@ public class Navigator extends Navigation {
 	 * heading
 	 * 
 	 * When avoid=true, the nav thread will handle traveling. If you want to
-	 * travel without avoidance, this is also possible. In this case,
-	 * the method in the Navigation class is used.
+	 * travel without avoidance, this is also possible. In this case, the method
+	 * in the Navigation class is used.
 	 * 
 	 */
 	public void travelTo(double x, double y, boolean avoid) {
@@ -61,20 +72,18 @@ public class Navigator extends Navigation {
 		}
 	}
 
-	
 	/*
-	 * Updates the h
-//	 */
+	 * Updates the h //
+	 */
 	private void updateTravel() {
 		double minAng;
 
-		minAng = calculateAngle(destx, desty);
+		minAng = getDestAngle(destx, desty);
 		/*
-		 * Use the BasicNavigator turnTo here because 
-		 * minAng is going to be very small so just complete
-		 * the turn.
+		 * Use the BasicNavigator turnTo here because minAng is going to be very
+		 * small so just complete the turn.
 		 */
-		super.turnTo(minAng,false);
+		super.turnTo(minAng, false);
 		this.setSpeeds(FAST, FAST);
 	}
 
@@ -84,39 +93,41 @@ public class Navigator extends Navigation {
 		while (true) {
 			switch (state) {
 			case INIT:
+				// Sound.buzz();
 				if (isNavigating) {
 					state = State.TURNING;
 				}
 				break;
 			case TURNING:
 				/*
-				 * Note: you could probably use the original turnTo()
-				 * from BasicNavigator here without doing any damage.
-				 * It's cheating the idea of "regular and periodic" a bit
-				 * but if you're sure you never need to interrupt a turn there's
-				 * no harm.
+				 * Note: you could probably use the original turnTo() from
+				 * BasicNavigator here without doing any damage. It's cheating
+				 * the idea of "regular and periodic" a bit but if you're sure
+				 * you never need to interrupt a turn there's no harm.
 				 * 
-				 * However, this implementation would be necessary if you would like
-				 * to stop a turn in the middle (e.g. if you were travelling but also
-				 * scanning with a sensor for something...)
+				 * However, this implementation would be necessary if you would
+				 * like to stop a turn in the middle (e.g. if you were
+				 * travelling but also scanning with a sensor for something...)
 				 * 
 				 */
-				double destAngle = calculateAngle(destx, desty);
+				// Sound.beep();
+				double destAngle = getDestAngle(destx, desty);
 				turnTo(destAngle);
-				if(facingDest(destAngle)){
-					setSpeeds(0,0);
+				if (facingDest(destAngle)) {
+					stopMotors();
 					state = State.TRAVELLING;
 				}
 				break;
 			case TRAVELLING:
+				// Sound.buzz();
 				if (checkEmergency()) { // order matters!
 					state = State.EMERGENCY;
-					avoidance = new ObstacleAvoidance(this);
+					avoidance = new ObstacleAvoidance(this, colorSensor, colorData);
 					avoidance.start();
 				} else if (!checkIfDone(destx, desty)) {
 					updateTravel();
 				} else { // Arrived!
-					setSpeeds(0, 0);
+					stopMotors();
 					isNavigating = false;
 					state = State.INIT;
 				}
@@ -126,8 +137,24 @@ public class Navigator extends Navigation {
 					state = State.TURNING;
 				}
 				break;
+			// search for the block
+			case SEARCHING:
+				// object detected, go check the object
+				if (!detection.detectObject()) {
+					turnBy(90 - odometer.getTheta());
+					if (usSensor.getDistance() - Math.hypot(odometer.getX(), odometer.getY()) < 120) {
+						setSpeeds(0, 0);
+						goForward(usSensor.getDistance() - armLength);
+						// if object is block, catch it and set to TRAVELLING
+						if (detection.detectBlock()) {
+							armMotor.rotate(90);
+							state = State.TRAVELLING;
+						}
+					}
+				}
+				break;
 			}
-//			Log.log(Log.Sender.Navigator, "state: " + state);
+			// Log.log(Log.Sender.Navigator, "state: " + state);
 			try {
 				Thread.sleep(SLEEP_TIME);
 			} catch (InterruptedException e) {
@@ -140,19 +167,18 @@ public class Navigator extends Navigation {
 		return usSensor.getDistance() < 10;
 	}
 
-
 	private void turnTo(double angle) {
 		double error;
 		error = angle - this.odometer.getTheta();
 
 		if (error < -180.0) {
-			this.setSpeeds(-SLOW, SLOW);
+			this.setSpeeds(SLOW, -SLOW);
 		} else if (error < 0.0) {
-			this.setSpeeds(SLOW, -SLOW);
-		} else if (error > 180.0) {
-			this.setSpeeds(SLOW, -SLOW);
-		} else {
 			this.setSpeeds(-SLOW, SLOW);
+		} else if (error > 180.0) {
+			this.setSpeeds(-SLOW, SLOW);
+		} else {
+			this.setSpeeds(SLOW, -SLOW);
 		}
 
 	}
@@ -161,10 +187,8 @@ public class Navigator extends Navigation {
 	 * Go foward a set distance in cm with or without avoidance
 	 */
 	public void goForward(double distance, boolean avoid) {
-		double x = odometer.getX()
-				+ Math.cos(Math.toRadians(this.odometer.getTheta())) * distance;
-		double y = odometer.getY()
-				+ Math.sin(Math.toRadians(this.odometer.getTheta())) * distance;
+		double x = odometer.getX() + Math.sin(Math.toRadians(this.odometer.getTheta())) * distance;
+		double y = odometer.getY() + Math.cos(Math.toRadians(this.odometer.getTheta())) * distance;
 
 		this.travelTo(x, y, avoid);
 
@@ -173,7 +197,5 @@ public class Navigator extends Navigation {
 	public boolean isTravelling() {
 		return isNavigating;
 	}
-
-
 
 }

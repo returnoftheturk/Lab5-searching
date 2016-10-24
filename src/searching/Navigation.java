@@ -12,8 +12,8 @@ package searching;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-public class Navigation {
-	final static int FAST = 200, SLOW = 100, ACCELERATION = 200;
+public class Navigation extends Thread {
+	final static int FAST = 125, SLOW = 75, ACCELERATION = 200;
 	final static double DEG_ERR = 3.0, CM_ERR = 3.0;
 	public Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
@@ -81,7 +81,7 @@ public class Navigation {
 	 * Will travel to designated position, while constantly updating it's
 	 * heading
 	 */
-	public void travelTo(double x, double y) {
+	public void travelTo1(double x, double y) {
 		isNavigating = true;
 
 		// call methods to calculate the angle and distance needed to travel
@@ -98,6 +98,15 @@ public class Navigation {
 		rightMotor.rotate(convertDistance(odometer.getRadius(), distance), false);
 
 	}
+	public void travelTo(double x, double y) {
+		double minAng;
+		while (!checkIfDone(x,y)) {
+			minAng = getDestAngle(x,y);
+			this.turnTo(minAng, false);
+			this.setSpeeds(FAST, FAST);
+		}
+		this.setSpeeds(0, 0);
+	}
 
 	/*
 	 * TurnTo function which takes an angle and boolean as arguments The boolean
@@ -112,13 +121,13 @@ public class Navigation {
 			error = angle - this.odometer.getTheta();
 
 			if (error < -180.0) {
-				this.setSpeeds(-SLOW, SLOW);
+				this.setSpeeds(SLOW, -SLOW);
 			} else if (error < 0.0) {
-				this.setSpeeds(SLOW, -SLOW);
-			} else if (error > 180.0) {
-				this.setSpeeds(SLOW, -SLOW);
-			} else {
 				this.setSpeeds(-SLOW, SLOW);
+			} else if (error > 180.0) {
+				this.setSpeeds(-SLOW, SLOW);
+			} else {
+				this.setSpeeds(SLOW, -SLOW);
 			}
 		}
 
@@ -127,22 +136,22 @@ public class Navigation {
 		}
 	}
 
-	public void turnto1(double thetaFinal) {
-
-		leftMotor.setSpeed(150);
-		rightMotor.setSpeed(150);
-		double thetaOdometer = odometer.getTheta();
-		theta = thetaFinal - thetaOdometer;
-		if (theta >= -180 && theta <= 180) {
-			theta = theta;
-		} else if (theta < -180) {
-			theta = theta + 360;
-		} else if (theta > 180) {
-			theta = theta - 360;
-		}
-		leftMotor.rotate(convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), true);
-		rightMotor.rotate(-convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), false);
-	}
+//	public void turnto1(double thetaFinal) {
+//
+//		leftMotor.setSpeed(150);
+//		rightMotor.setSpeed(150);
+//		double thetaOdometer = odometer.getTheta();
+//		theta = thetaFinal - thetaOdometer;
+//		if (theta >= -180 && theta <= 180) {
+//			theta = theta;
+//		} else if (theta < -180) {
+//			theta = theta + 360;
+//		} else if (theta > 180) {
+//			theta = theta - 360;
+//		}
+//		leftMotor.rotate(convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), true);
+//		rightMotor.rotate(-convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), false);
+//	}
 
 	// method to turn by a set angle
 	public void turnBy(double angle) {
@@ -232,5 +241,13 @@ public class Navigation {
 	protected boolean checkIfDone(double x, double y) {
 		return Math.abs(x - odometer.getX()) < CM_ERR
 				&& Math.abs(y - odometer.getY()) < CM_ERR;
+	}
+	protected double getDestAngle(double x, double y) {
+		double minAng = (Math.atan2(x - odometer.getX(), y - odometer.getY()))
+				* (180.0 / Math.PI);
+		if (minAng < 0) {
+			minAng += 360.0;
+		}
+		return minAng;
 	}
 }

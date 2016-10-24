@@ -21,11 +21,9 @@ public class Lab5 {
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 	private static final Port colorPort = LocalEV3.get().getPort("S4");
 
-	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 14.6;
-	private static Navigation nav;
-	private static Navigator navr;
-	private static Driver drv;
+
+	private static Navigator nav;
+	private static Navigation navigation;
 
 	public static void main(String[] args) {
 
@@ -66,26 +64,13 @@ public class Lab5 {
 
 		// setup the odometer and display
 		Odometer odo = new Odometer(leftMotor, rightMotor, 30, true);
+		navigation = new Navigation(odo);
 
-		nav = new Navigation(odo);
-
-		// perform the ultrasonic localization
-		USLocalizer usl = new USLocalizer(odo, nav, usValue, usData, USLocalizer.LocalizationType.FALLING_EDGE,
-				rightMotor, leftMotor);
-
-		LightLocalizer lsl = new LightLocalizer(odo, nav, colorValue, colorData, rightMotor, leftMotor);
-		BlockDetection blockDetection = new BlockDetection(usSensor, colorSensor, colorData);
-		
 		int buttonChoice;
 
 		// some objects that need to be instantiated
 
 		final TextLCD t = LocalEV3.get().getTextLCD();
-		// Odometer odometer = new Odometer(leftMotor, rightMotor, WHEEL_RADIUS,
-		// TRACK);
-		// OdometryDisplay odometryDisplay = new OdometryDisplay(odometer,t);
-		// OdometryCorrection odometryCorrection = new
-		// OdometryCorrection(odometer);
 
 		do {
 			// clear the display
@@ -103,29 +88,27 @@ public class Lab5 {
 
 		if (buttonChoice == Button.ID_LEFT) {
 			t.clear();
+			BlockDetection blockDetection = new BlockDetection(usSensor, colorSensor, colorData);
 			UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData, blockDetection);
 			usPoller.start();
-			LCDInfo lcd = new LCDInfo(odo, usl, lsl, LCDInfo.DemoType.OBJECT_DETECTION, blockDetection);
+			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_DETECTION, blockDetection);
 			blockDetection.doDetection();
 			// odometer.start();
 			// odometryDisplay.start();
 		} else if (buttonChoice == Button.ID_RIGHT) {
 			t.clear();
+			BlockDetection blockDetection = new BlockDetection(usSensor, colorSensor, colorData);
+			USLocalizer usl = new USLocalizer(odo, navigation, usValue, usData,
+					USLocalizer.LocalizationType.FALLING_EDGE, rightMotor, leftMotor);
 			UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData, usl);
-			LCDInfo lcd = new LCDInfo(odo, usl, lsl, LCDInfo.DemoType.OBJECT_SEARCH_FIND, blockDetection);
-			drv = new Driver(odo, usPoller, blockDetection, armMotor);
-			navr = new Navigator(odo,usPoller);
+			nav = new Navigator(odo, usPoller, colorSensor, colorData, blockDetection, armMotor);
+			
+			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_SEARCH_FIND, usl);
 			usPoller.start();
+//			nav.turnBy(360);
 			usl.doLocalization();
-			// odometer.start();
-			// odometryDisplay.start();
-			// odometryCorrection.start();
-			// (new Thread() {
-			// public void run() {
-			// SquareDriver.drive(leftMotor, rightMotor, WHEEL_RADIUS,
-			// WHEEL_RADIUS, TRACK);
-			// }
-			// }).start();
+			nav.start();
+			completeCourse();
 		}
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
@@ -135,12 +118,13 @@ public class Lab5 {
 	}
 
 	private static void completeCourse() {
-
-		int[][] waypoints = { { 60, 30 }, { 30, 30 }, { 30, 60 }, { 60, 0 } };
+		int[][] waypoints = { { 76, 15 }, { -15, 45 }, { 76, 76 }, { -15, 70 }, {70, 45}, 
+				{-15, 15}, {45, -15}, {15, -15}, {15, 76}, {45, 76}, {76, -15}, {76, 76} };
+		
 
 		for (int[] point : waypoints) {
-			drv.travelTo(point[0], point[1], true);
-			while (drv.isTravelling()) {
+			nav.travelTo(point[0], point[1], true);
+			while (nav.isTravelling()) {
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
