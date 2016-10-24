@@ -95,7 +95,7 @@ public class Navigator extends Navigation {
 			case INIT:
 				// Sound.buzz();
 				if (isNavigating) {
-					state = State.TURNING;
+					state = State.SEARCHING;
 				}
 				break;
 			case TURNING:
@@ -139,9 +139,10 @@ public class Navigator extends Navigation {
 				break;
 			// search for the block
 			case SEARCHING:
-				// object detected, go check the object
+				// turn 90 degrees, theoretically, robot should detect something
 				if (!detection.detectObject()) {
 					turnBy(90 - odometer.getTheta());
+					// object detected, go check the object
 					if (usSensor.getDistance() - Math.hypot(odometer.getX(), odometer.getY()) < 120) {
 						setSpeeds(0, 0);
 						goForward(usSensor.getDistance() - armLength);
