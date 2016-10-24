@@ -146,7 +146,7 @@ public class Navigator extends Navigation {
 	}
 
 	private boolean checkEmergency() {
-		return usSensor.getDistance() < 10;
+		return usSensor.getDistance() < 25;
 	}
 
 

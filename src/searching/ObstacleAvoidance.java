@@ -39,7 +39,7 @@ public class ObstacleAvoidance extends Thread {
 
 		// Log.log(Log.Sender.avoidance,"avoiding obstacle!");
 		nav.setSpeeds(30, 30);
-		while (nav.usSensor.getDistance() > 3) {
+		while (nav.usSensor.getDistance() > 3 && nav.usSensor.getDistance()< 25) {
 
 		}
 		nav.stopMotors();
@@ -47,14 +47,29 @@ public class ObstacleAvoidance extends Thread {
 			Sound.buzz();
 			armMotor.setSpeed(200);
 			armMotor.rotate(100, false);
-			nav.travelTo(75, 75, false);
+			nav.travelTo(60, 60, false);
+			nav.turnTo(45, true);
+			armMotor.rotate(-100, false);
+			while(nav.usSensor.getDistance()<10){
+				nav.setSpeeds(-30, -30);
+			}
 			
 		} else  {
+			while(nav.usSensor.getDistance()<10){
+				nav.setSpeeds(-30, -30);
+			
+			}
+			nav.turnBy(90);
+			nav.goForward(30, false);
+//			nav.travelTo(nav.odometer.getX() + 15, nav.odometer.getY(), false);
+			nav.turnBy(-90);
+			nav.goForward(30, false);
+//			nav.travelTo(nav.odometer.getX(), nav.odometer.getY()+15, false);
 			Sound.beep();
-			nav.travelTo(nav.odometer.getX()-5, nav.odometer.getY()-5, false);
-			nav.turnTo(nav.odometer.getTheta() + 90, false);
-			nav.travelTo(nav.odometer.getX() + 15, nav.odometer.getY()+15, false);
-			nav.turnTo(nav.odometer.getTheta() - 90, false);
+//			nav.travelTo(nav.odometer.getX()-5, nav.odometer.getY()-5, false);
+//			nav.turnTo(nav.odometer.getTheta() + 90, false);
+//			
+//			nav.turnTo(nav.odometer.getTheta() - 90, false);
 
 		}
 

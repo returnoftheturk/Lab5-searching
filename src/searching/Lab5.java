@@ -104,7 +104,7 @@ public class Lab5 {
 			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_SEARCH_FIND, usl);
 			usPoller.start();
 //			nav.turnBy(360);
-			usl.doLocalization();
+//			usl.doLocalization();
 			nav.start();
 			completeCourse();
 		}
@@ -116,8 +116,9 @@ public class Lab5 {
 	}
 
 	private static void completeCourse() {
-		int[][] waypoints = { { 76, 15 }, { -15, 45 }, { 76, 76 }, { -15, 70 }, {70, 45}, 
-				{-15, 15}, {45, -15}, {15, -15}, {15, 76}, {45, 76}, {76, -15}, {76, 76} };
+		int[][] waypoints = { { 30, 0 }, { 30, 30 }, { 0, 30 }, { 0, 60 }, {30, 60}, 
+				{30, 30}, {60, 30}, {60, 0}, {30, 0}, {30, 60}, {0, 60}, {0, 30}, 
+				{30, 30}, {60, 30}, {60, 60}};
 		
 
 		for (int[] point : waypoints) {
