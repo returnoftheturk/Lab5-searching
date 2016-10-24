@@ -148,7 +148,7 @@ public class Navigator extends Navigation {
 						// if object is block, catch it and set to TRAVELLING
 						if (detection.detectBlock()) {
 							armMotor.rotate(90);
-							state = State.TRAVELLING;
+							state = State.TURNING;
 						}
 					}
 				}
