@@ -97,14 +97,14 @@ public class Lab5 {
 		} else if (buttonChoice == Button.ID_RIGHT) {
 			t.clear();
 			USLocalizer usl = new USLocalizer(odo, navigation, usValue, usData,
-					USLocalizer.LocalizationType.FALLING_EDGE, rightMotor, leftMotor);
+					USLocalizer.LocalizationType.RISING_EDGE, rightMotor, leftMotor);
 			UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData, usl);
 			nav = new Navigator(odo, usPoller, colorSensor, colorData);
 			
 			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_SEARCH_FIND, usl);
 			usPoller.start();
-//			nav.turnBy(360);
-//			usl.doLocalization();
+			nav.turnBy(360);
+			usl.doLocalization();
 			nav.start();
 			completeCourse();
 		}

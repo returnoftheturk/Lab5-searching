@@ -41,19 +41,19 @@ public class USLocalizer implements UltrasonicController {
 		if (locType == LocalizationType.FALLING_EDGE) {
 
 			// if distance>50
-			//rotate until robot sees a wall
+			// rotate until robot sees a wall
 			if (getFilteredData() > d + k) {
 				while (getFilteredData() > d) {
 					nav.setSpeeds(-ROTATION_SPEED, ROTATION_SPEED);
 				}
 				nav.stopMotors();
 			}
-			
+
 			// rotate the robot until it sees no wall
 
 			// start rotating towards the right (positive angle)
 			// while distance < 50
-			
+
 			while (getFilteredData() < d + k) {
 				nav.setSpeeds(ROTATION_SPEED, -ROTATION_SPEED);
 			}
@@ -110,24 +110,99 @@ public class USLocalizer implements UltrasonicController {
 
 			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
 			Sound.beep();
-			
+
 			nav.turnTo(270, true);
-			
+
 			double loc1 = readUSDistance();
 			Sound.beep();
 			nav.turnTo(180, true);
 			double loc2 = readUSDistance();
 			Sound.beep();
-			nav.travelTo(30.48-(loc1+8), 30.48- (loc2+8));
+			nav.travelTo(30.48 - (loc1 + 8), 30.48 - (loc2 + 8));
 			Sound.beep();
 			nav.turnTo(0, true);
 			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
-			
-		} 
+		} else {
+			/*
+			 * The robot should turn until it sees the wall, then look for the
+			 * "rising edges:" the points where it no longer sees the wall. This
+			 * is very similar to the FALLING_EDGE routine, but the robot will
+			 * face toward the wall for most of it.
+			 */
+
+			// if distance>50
+			if (getFilteredData() > d + k) {
+				while (getFilteredData() > d) {
+					nav.setSpeeds(-ROTATION_SPEED, ROTATION_SPEED);
+				}
+				nav.stopMotors();
+			}
+
+			// start rotating towards the right (positive angle)
+			// while distance < 50
+			// latch the angle
+			while (getFilteredData() < d + k) {
+				nav.setSpeeds(ROTATION_SPEED, -ROTATION_SPEED);
+			}
+			Sound.buzz();
+			nav.stopMotors();
+			angleA1 = this.odo.getTheta();
+
+			// keep rotating until robot is under the falling edge
+			// while distance > 30
+			while (getFilteredData() > d - k) { // - tolerance
+				nav.setSpeeds(-ROTATION_SPEED, +ROTATION_SPEED);
+
+			}
+			Sound.buzz();
+			nav.stopMotors();
+			angleA2 = this.odo.getTheta();
+
+			// while distance < 50
+			// rotate back the other way
+			while (getFilteredData() < d + k) {
+				nav.setSpeeds(-ROTATION_SPEED, ROTATION_SPEED);
+			}
+			Sound.buzz();
+			nav.stopMotors();
+			angleB2 = odo.getTheta();
+
+			// while distance>30
+			while (getFilteredData() > d - k) {
+				nav.setSpeeds(ROTATION_SPEED, -ROTATION_SPEED);
+			}
+			Sound.buzz();
+			nav.stopMotors();
+			angleB1 = this.odo.getTheta();
+
+			angleB = (angleB1 + angleB2) / 2;
+			angleA = (angleA1 + angleA2) / 2;
+
+			if (angleA > angleB) {
+				angleB += 360;
+			}
+
+			nav.turnBy(-(angleB - angleA) / 2 - 38 + (angleB2 - angleB1) / 2);
+
+			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
+			Sound.beep();
+
+			nav.turnTo(270, true);
+
+			double loc1 = readUSDistance();
+			Sound.beep();
+			nav.turnTo(180, true);
+			double loc2 = readUSDistance();
+			Sound.beep();
+			nav.travelTo(30.48 - (loc1 + 8), 30.48 - (loc2 + 8));
+			Sound.beep();
+			nav.turnTo(0, true);
+			odo.setPosition(new double[] { 0.0, 0.0, 0.0 }, new boolean[] { true, true, true });
+		}
 	}
 
 	private float getFilteredData() {
-		//method to filter data greater than 255
+		// method to filter data greater than 255
 		usSensor.fetchSample(usData, 0);
 		float distance = usData[0] * 100;
 		if (distance > 255)
@@ -147,6 +222,5 @@ public class USLocalizer implements UltrasonicController {
 		// TODO Auto-generated method stub
 		return wallDistance;
 	}
-
 
 }

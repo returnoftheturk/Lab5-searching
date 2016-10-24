@@ -9,15 +9,21 @@ public class ObstacleAvoidance extends Thread {
 
 	Navigator nav;
 	boolean safe;
+	boolean obstruction;
 	private SampleProvider colorSensor;
 	private float[] colorData;
+	private double destx, desty;
 	private static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
-	public ObstacleAvoidance(Navigator nav, SampleProvider colorSensor, float[] colorData) {
+	public ObstacleAvoidance(Navigator nav, SampleProvider colorSensor, float[] colorData,
+			double destx, double desty) {
 		this.nav = nav;
 		this.colorSensor = colorSensor;
 		this.colorData = colorData;
+		this.destx = destx;
+		this.desty = desty;
 		safe = false;
+		obstruction = false;
 	}
 
 	public void run() {
@@ -55,28 +61,30 @@ public class ObstacleAvoidance extends Thread {
 			}
 			
 		} else  {
-			while(nav.usSensor.getDistance()<10){
-				nav.setSpeeds(-30, -30);
-			
+			if (Math.abs(destx - nav.odometer.getX())<15 || Math.abs(desty - nav.odometer.getY())<15){
+				obstruction = true;
 			}
+			while(nav.usSensor.getDistance()<15){
+				nav.setSpeeds(-30, -30);
+			}
+			
 			nav.turnBy(90);
-			nav.goForward(30, false);
-//			nav.travelTo(nav.odometer.getX() + 15, nav.odometer.getY(), false);
-			nav.turnBy(-90);
-			nav.goForward(30, false);
-//			nav.travelTo(nav.odometer.getX(), nav.odometer.getY()+15, false);
-			Sound.beep();
-//			nav.travelTo(nav.odometer.getX()-5, nav.odometer.getY()-5, false);
-//			nav.turnTo(nav.odometer.getTheta() + 90, false);
-//			
-//			nav.turnTo(nav.odometer.getTheta() - 90, false);
-
+			if (nav.usSensor.getDistance()>50){
+				nav.goForward(30, false);
+			} else {
+				nav.turnBy(180);
+			}
+			if (nav.usSensor.getDistance()>50){
+				nav.goForward(30,false);
+			} else {
+				nav.turnBy(-90);
+			} 
+			if (nav.usSensor.getDistance()>50){
+				nav.goForward(30, false);
+			}
+			else obstruction = true;
+				
 		}
-
-		// nav.turnTo(0,true);
-		// nav.goForward(5, false); //using false means the Navigation method is
-		// used
-		// Log.log(Log.Sender.avoidance,"obstacle avoided!");
 		safe = true;
 	}
 
@@ -88,5 +96,8 @@ public class ObstacleAvoidance extends Thread {
 
 	public boolean resolved() {
 		return safe;
+	}
+	public boolean obstructionAtPoint(){
+		return obstruction;
 	}
 }

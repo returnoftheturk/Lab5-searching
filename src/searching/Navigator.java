@@ -120,7 +120,7 @@ public class Navigator extends Navigation {
 //				Sound.buzz();
 				if (checkEmergency()) { // order matters!
 					state = State.EMERGENCY;
-					avoidance = new ObstacleAvoidance(this, colorSensor, colorData);
+					avoidance = new ObstacleAvoidance(this, colorSensor, colorData, destx, desty);
 					avoidance.start();
 				} else if (!checkIfDone(destx, desty)) {
 					updateTravel();
@@ -131,9 +131,14 @@ public class Navigator extends Navigation {
 				}
 				break;
 			case EMERGENCY:
-				if (avoidance.resolved()) {
-					state = State.TURNING;
+				if (avoidance.obstructionAtPoint()){
+					stopMotors();
+					isNavigating = false;
+					state = State.INIT;
 				}
+				else if (avoidance.resolved()) {
+					state = State.TURNING;
+				} 
 				break;
 			}
 //			Log.log(Log.Sender.Navigator, "state: " + state);
@@ -146,7 +151,7 @@ public class Navigator extends Navigation {
 	}
 
 	private boolean checkEmergency() {
-		return usSensor.getDistance() < 25;
+		return usSensor.getDistance() < 23;
 	}
 
 
