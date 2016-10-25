@@ -1,3 +1,6 @@
+//Seperate thread to enter once the robot detects an object
+//Gets close to object to tell whether or not it is a block or non block
+
 package searching;
 
 import lejos.hardware.Sound;
@@ -45,49 +48,68 @@ public class ObstacleAvoidance extends Thread {
 
 		// Log.log(Log.Sender.avoidance,"avoiding obstacle!");
 		nav.setSpeeds(30, 30);
+		Sound.beep();
+		//get closer to the newly found target
 		while (nav.usSensor.getDistance() > 3 && nav.usSensor.getDistance()< 25) {
 
 		}
 		nav.stopMotors();
+		
+		//detect whether or not it is a block or non block
 		if (getColorData() < 7 && getColorData() > 5) {
+			//this means it is a block
 			Sound.buzz();
-			armMotor.setSpeed(200);
+			Sound.buzz();
+			//grabs block
+			armMotor.setSpeed(100);
 			armMotor.rotate(100, false);
-			nav.travelTo(60, 60, false);
+			nav.travelTo(63, 63, false);
 			nav.turnTo(45, true);
 			armMotor.rotate(-100, false);
+			Sound.beep();
+			Sound.beep();
+			Sound.beep();
 			while(nav.usSensor.getDistance()<10){
 				nav.setSpeeds(-30, -30);
 			}
 			
 		} else  {
-			if (Math.abs(destx - nav.odometer.getX())<15 || Math.abs(desty - nav.odometer.getY())<15){
-				obstruction = true;
-			}
-			while(nav.usSensor.getDistance()<15){
+			//non block or a wall
+			Sound.buzz();
+			obstruction = true;
+			//boolean to go to the next point
+			
+//			if (Math.abs(destx - nav.odometer.getX())<15 || Math.abs(desty - nav.odometer.getY())<15){
+//				obstruction = true;
+//			}
+			while(nav.usSensor.getDistance()<25){
 				nav.setSpeeds(-30, -30);
 			}
-			
-			nav.turnBy(90);
-			if (nav.usSensor.getDistance()>50){
-				nav.goForward(30, false);
-			} else {
-				nav.turnBy(180);
-			}
-			if (nav.usSensor.getDistance()>50){
-				nav.goForward(30,false);
-			} else {
-				nav.turnBy(-90);
-			} 
-			if (nav.usSensor.getDistance()>50){
-				nav.goForward(30, false);
-			}
-			else obstruction = true;
+//			
+			//this is code that we were using to hard code avoiding obstacles. 
+			//however it also did not work with walls.  As it would enter a thread
+			//and stop polling the ultrasonic until it exited the thread.
+//			nav.turnBy(90);
+//			if (nav.usSensor.getDistance()>50){
+//				nav.goForward(30, false);
+//			} else {
+//				nav.turnBy(180);
+//			}
+//			if (nav.usSensor.getDistance()>50){
+//				nav.goForward(30,false);
+//			} else {
+//				nav.turnBy(-90);
+//			} 
+//			if (nav.usSensor.getDistance()>50){
+//				nav.goForward(30, false);
+//			}
+//			else obstruction = true;
 				
 		}
 		safe = true;
 	}
 
+	//method to get colorData from the light sensor
 	public double getColorData() {
 		colorSensor.fetchSample(colorData, 0);
 		double colorLevel = colorData[0];
@@ -97,6 +119,8 @@ public class ObstacleAvoidance extends Thread {
 	public boolean resolved() {
 		return safe;
 	}
+	
+	//method to go to the next point if there is an obstruction at the current point
 	public boolean obstructionAtPoint(){
 		return obstruction;
 	}

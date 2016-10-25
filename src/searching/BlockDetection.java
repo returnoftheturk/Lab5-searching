@@ -1,3 +1,7 @@
+//Code to run part 1 of the demo
+//will detect if its a block or non block
+//passes information to LCDINFO 
+
 package searching;
 
 import lejos.hardware.Button;
@@ -13,22 +17,30 @@ public class BlockDetection implements UltrasonicController {
 	public BlockDetection(SampleProvider usSensor, SampleProvider colorSensor, float[] colorData) {
 		this.usSensor = usSensor;
 		this.colorSensor = colorSensor;
+		//assume no blocks are detected at first
 		this.blockInfo = new String[] { "No Object Detected", "No Object Detected" };
 		this.colorData = colorData;
 	}
 
 	public void doDetection(){
-		int count = 0;
+		//have program run forever so it can keep detecting for as long
+		//as the demo goes on
 		while (true){
+			//if distance is not less than 5, have display say no object detected.
 			if (distance>5){
 				resetBlockInfo();
 			}
 			
+			//within range, detect whether or not block or non block
 			if (distance<5){
 				blockInfo[0] = "Object Detected";
+				
+				//block
 				if (getColorData()<7 && getColorData()>5){
 					blockInfo[1] = "Block";
 				}
+				
+				//non block
 				else if (getColorData()>10 && getColorData()<15){
 					blockInfo[1] = "Not Block";
 				}
@@ -51,6 +63,7 @@ public class BlockDetection implements UltrasonicController {
 		return distance;
 	}
 
+	//constructor to display on screen
 	public void getBlockInfo(String[] info) {
 		info[0] = blockInfo[0];
 		info[1] = blockInfo[1];

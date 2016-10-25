@@ -1,3 +1,6 @@
+//Class to display information on the screen for 
+//both parts of the demo
+
 package searching;
 
 import lejos.hardware.ev3.LocalEV3;
@@ -6,6 +9,8 @@ import lejos.utility.Timer;
 import lejos.utility.TimerListener;
 
 public class LCDInfo implements TimerListener{
+	//change what to display based on the click on the robot
+	//for part 1 or part 2 of the demo
 	public enum DemoType {
 		OBJECT_DETECTION, OBJECT_SEARCH_FIND
 	};

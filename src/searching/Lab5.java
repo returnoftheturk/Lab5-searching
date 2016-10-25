@@ -1,3 +1,5 @@
+//Main class to run code
+
 package searching;
 
 import lejos.hardware.*;
@@ -75,7 +77,7 @@ public class Lab5 {
 			// clear the display
 			t.clear();
 
-			// ask the user whether the motors should drive in a square or float
+			// ask the user whether the motors should detect obstacles or run the course
 			t.drawString("< Left | Right >", 0, 0);
 			t.drawString("       |        ", 0, 1);
 			t.drawString("Detect | Search ", 0, 2);
@@ -90,6 +92,7 @@ public class Lab5 {
 			BlockDetection blockDetection = new BlockDetection(usSensor, colorSensor, colorData);
 			UltrasonicPoller usPoller = new UltrasonicPoller(usValue, usData, blockDetection);
 			usPoller.start();
+			//start the poller
 			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_DETECTION, blockDetection);
 			blockDetection.doDetection();
 			// odometer.start();
@@ -103,6 +106,8 @@ public class Lab5 {
 			
 			LCDInfo lcd = new LCDInfo(odo, LCDInfo.DemoType.OBJECT_SEARCH_FIND, usl);
 			usPoller.start();
+			//start the threads
+			//turn by 360 just to test out the track value
 			nav.turnBy(360);
 			usl.doLocalization();
 			nav.start();
@@ -116,9 +121,10 @@ public class Lab5 {
 	}
 
 	private static void completeCourse() {
-		int[][] waypoints = { { 30, 0 }, { 30, 30 }, { 0, 30 }, { 0, 60 }, {30, 60}, 
-				{30, 30}, {60, 30}, {60, 0}, {30, 0}, {30, 60}, {0, 60}, {0, 30}, 
-				{30, 30}, {60, 30}, {60, 60}};
+		//set points to go to
+		int[][] waypoints = { { 30, 0 }, { 30, 30 }, { 60, 30 }, { 60, 60 }, {30, 60}, 
+				{0, 60}, {0, 30}, {30, 30}, {60, 30}, {60, 0}, {30, 0}, {30, 30}, 
+				{0, 30}, {0, 60}, {30, 60}};
 		
 
 		for (int[] point : waypoints) {

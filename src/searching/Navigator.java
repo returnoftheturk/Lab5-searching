@@ -1,3 +1,8 @@
+
+//State maching taken from Tutorial notes.  Very similar.
+//Edited to work for our robot. 
+//5 cases: INIT, TURNING, TRAVELING, SEARCHING, EMERGENCY
+
 package searching;
 
 import lejos.hardware.Sound;
@@ -25,7 +30,7 @@ import lejos.hardware.sensor.SensorModes;
 public class Navigator extends Navigation {
 
 	enum State {
-		INIT, TURNING, TRAVELLING, EMERGENCY
+		INIT, TURNING, TRAVELLING, EMERGENCY, SEARCHING
 	};
 
 	State state;
@@ -128,8 +133,20 @@ public class Navigator extends Navigation {
 					stopMotors();
 					isNavigating = false;
 					state = State.INIT;
+					//here is where we tried to implement searching.  However,
+					//the robot would constantly see walls, and think they were obstacles.
+					//Too much noise with the ultrasonic sensor to work correctly.
+//					state = State.SEARCHING;
 				}
 				break;
+				//case to search for blocks once it reaches each destination
+//			case SEARCHING:
+//				setSpeeds(-30, 30);
+//				while (usSensor.getDistance()>70){}
+//				stopMotors();
+//				state = State.TRAVELLING;
+//				
+//				break;
 			case EMERGENCY:
 				if (avoidance.obstructionAtPoint()){
 					stopMotors();

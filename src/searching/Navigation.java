@@ -1,19 +1,14 @@
-/*
- * File: Navigation.java
- * Written by: Sean Lawlor
- * ECSE 211 - Design Principles and Methods, Head TA
- * Fall 2011
- * Ported to EV3 by: Francois Ouellet Delorme
- * Fall 2015
- * 
- * Movement control class (turnTo, travelTo, flt, localize)
- */
+//Class to navigate from point to point.  Code taken from
+// ta code but edited extensively to work for our robot
+//Implements travelTo methods, turnTo methods, as well as other
+//helper methods to navigate
+
 package searching;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation extends Thread {
-	final static int FAST = 125, SLOW = 75, ACCELERATION = 200;
+	final static int FAST = 100, SLOW = 50, ACCELERATION = 200;
 //	final static int FAST = 400, SLOW = 300, ACCELERATION = 1000;
 	final static double DEG_ERR = 3.0, CM_ERR = 3.0;
 	public Odometer odometer;
@@ -82,23 +77,7 @@ public class Navigation extends Thread {
 	 * Will travel to designated position, while constantly updating it's
 	 * heading
 	 */
-	public void travelTo1(double x, double y) {
-		isNavigating = true;
 
-		// call methods to calculate the angle and distance needed to travel
-		double diffTheta = calculateAngle(x, y);
-		double distance = calculateDistance(x, y);
-
-		turnBy(diffTheta); // turn to the needed angle
-
-		leftMotor.setSpeed(SLOW);
-		rightMotor.setSpeed(SLOW);
-
-		// rotate wheels to go to the needed distance
-		leftMotor.rotate(convertDistance(odometer.getRadius(), distance), true);
-		rightMotor.rotate(convertDistance(odometer.getRadius(), distance), false);
-
-	}
 	public void travelTo(double x, double y) {
 		double minAng;
 		while (!checkIfDone(x,y)) {
@@ -137,22 +116,6 @@ public class Navigation extends Thread {
 		}
 	}
 
-//	public void turnto1(double thetaFinal) {
-//
-//		leftMotor.setSpeed(150);
-//		rightMotor.setSpeed(150);
-//		double thetaOdometer = odometer.getTheta();
-//		theta = thetaFinal - thetaOdometer;
-//		if (theta >= -180 && theta <= 180) {
-//			theta = theta;
-//		} else if (theta < -180) {
-//			theta = theta + 360;
-//		} else if (theta > 180) {
-//			theta = theta - 360;
-//		}
-//		leftMotor.rotate(convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), true);
-//		rightMotor.rotate(-convertAngle(this.odometer.getRadius(), this.odometer.getWidth(), theta), false);
-//	}
 
 	// method to turn by a set angle
 	public void turnBy(double angle) {
@@ -236,13 +199,16 @@ public class Navigation extends Thread {
 		return diffTheta;
 
 	}
+	//is it facing where it wants to go
 	protected boolean facingDest(double angle) {
 		return Math.abs(angle - odometer.getTheta()) < DEG_ERR;
 	}
+	//check if it arrived where it wants to be
 	protected boolean checkIfDone(double x, double y) {
 		return Math.abs(x - odometer.getX()) < CM_ERR
 				&& Math.abs(y - odometer.getY()) < CM_ERR;
 	}
+	//get angle of where it wants to go
 	protected double getDestAngle(double x, double y) {
 		double minAng = (Math.atan2(x - odometer.getX(), y - odometer.getY()))
 				* (180.0 / Math.PI);

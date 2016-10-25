@@ -1,3 +1,7 @@
+//class to localize to POint 0,0 using only the US Sensor.
+//Note, this class works excellent without any noise, and
+//performs within an acceptable standard with noise.
+
 package searching;
 
 import lejos.hardware.Sound;
@@ -129,6 +133,9 @@ public class USLocalizer implements UltrasonicController {
 			 * is very similar to the FALLING_EDGE routine, but the robot will
 			 * face toward the wall for most of it.
 			 */
+			
+			//note in lab 5 we used rising edge as the robot would sense the blocks 
+			//and incorrectly localize otherwise.
 
 			// if distance>50
 			if (getFilteredData() > d + k) {
